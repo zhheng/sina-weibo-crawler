@@ -5,6 +5,8 @@ import os
 from bs4 import BeautifulSoup
 from copy import deepcopy
 from sys import stderr
+import sys
+import lxml
 
 class WCrawler:
 
@@ -66,11 +68,12 @@ class WCrawler:
 
         if self.wfilter != self.ALL and self.wfilter != self.ORIGINAL:
             stderr.write('Invalid wfilter parameter, expect: all | original\n')
-            exit(1)
+            sys.exit(1)
         self.headers['Cookie'] = cookie
 
-    def crawl(self, url='http://weibo.cn/yaochen'):
-        self.data = {'url': '', \
+    def crawl(self, url='https://weibo.cn/yaochen'):
+        self.data = {'uid':'',
+                    'url': '', \
                     'nickname': '', \
                     'verify_type': '', \
                     'verify_info': '', \
@@ -114,6 +117,12 @@ class WCrawler:
             soup = BeautifulSoup(req.text, 'lxml')
             self.data['weibo'] += self.__parse_weibo(soup)
         self.data['weibo'] = self.data['weibo'][:self.max_num_weibo]
+
+        # 1.5 parse uid
+        try:
+            self.data['uid'] = info_url.split("/")[-2]
+        except:
+            pass
 
         # step 2: crawl user's personal information
         req = self.__get_request(info_url)
@@ -221,10 +230,10 @@ class WCrawler:
                     self.data['num_weibo'] = int(text.strip(u'微博|[|]'))
                 elif text.startswith(u'关注'):
                     self.data['num_follow'] = int(text.strip(u'关注|[|]'))
-                    follow_url = self.__remove_qmark('http://weibo.cn' + e['href'])
+                    follow_url = self.__remove_qmark('https://weibo.cn' + e['href'])
                 elif text.startswith(u'粉丝'):
                     self.data['num_fans'] = int(text.strip(u'粉丝|[|]'))
-                    fans_url = self.__remove_qmark('http://weibo.cn' + e['href'])
+                    fans_url = self.__remove_qmark('https://weibo.cn' + e['href'])
             except:
                 continue
         assert(follow_url != None and fans_url != None)
@@ -235,14 +244,14 @@ class WCrawler:
         for e in table.find_all('a'):
             if e.get_text() == u'资料':
                 assert(e['href'][0] == '/')
-                ret = 'http://weibo.cn' + e['href']
+                ret = 'https://weibo.cn' + e['href']
                 return self.__remove_qmark(ret)
         # Should not reach here in normal case
         stderr.write('Error: can not find info tag.\n')
-        exit(1)
+        sys.exit(1)
 
     def __get_request(self, url, max_try=3):
-        stderr.write(url + '\n')
+        stderr.write('request for url :' + url + '\n')
         cnt = 0
         while cnt < max_try:
             try:
@@ -255,8 +264,8 @@ class WCrawler:
             return req
         # Should not reach here if everything is ok.
         stderr.write(json.dumps(self.data, ensure_ascii=False, sort_keys=True, indent=4).encode('utf-8', 'replace'))
-        stderr.write('Error: %s\n', url)
-        exit(1)
+        stderr.write('Error: %s\n' % url)
+        sys.exit(1)
 
     def __parse_weibo(self, soup):
         # return all weibo in a page as a list
@@ -274,7 +283,7 @@ class WCrawler:
                 continue
             else:
                 stderr.write('Error: invalid weibo page')
-                exit(1)
+                sys.exit(1)
         return ret
 
     def __parse_max_pages(self, soup):

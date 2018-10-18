@@ -7,6 +7,7 @@
 | 段域 | 数据类型 | 含义 | 附加说明 |
 |-------------|-------------|------------|---------------|
 | url | string | 主页的链接地址 | 唯一的主键 |
+| uid | string | uid | 主键
 | nickname | string | 昵称 | |
 | verify_type | string | 认证类型 | |
 | verify_info | string | 认证信息 | |
@@ -176,6 +177,7 @@ if __name__ == '__main__':
             "verify_type": "BLUE_V"
         }
     ],
+    "uid":"1266321801",
     "gender": "女",
     "good_at": "",
     "location": "北京 朝阳区",
