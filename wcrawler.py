@@ -8,16 +8,11 @@ from sys import stderr
 import sys
 import lxml
 
+
 class WCrawler:
 
-
-    def __init__(self,  cookie, \
-                        max_num_weibo=10, \
-                        max_num_fans=10, \
-                        max_num_follow=10, \
-                        max_num_page=50, \
-                        wfilter='all', \
-                        return_type="string"):
+    def __init__(self, cookie, max_num_weibo=10, max_num_fans=10, max_num_follow=10, max_num_page=50, wfilter='all',
+                 return_type="string"):
         """
         cookie:               登录账户的cookie，强制参数
         max_num_weibo:        最多抓取的微博条数，负数则爬取所有微博
@@ -27,7 +22,7 @@ class WCrawler:
         wfilter:              爬取的微博类型，'all'表示所有微博，'original'表示只爬取原创微博，其它值无效
         return_type:          返回值类型，'string'返回字符串化的json数据，'json'就返回一个json对象
         """
-        self.INF = 10**9
+        self.INF = 10 ** 9
         if max_num_weibo < 0:
             self.max_num_weibo = self.INF
         else:
@@ -51,17 +46,17 @@ class WCrawler:
         # some constant, DO NOT CHANGE THEM
         RED_V, BLUE_V, VIP, ACTIVE = 'RED_V', 'BLUE_V', 'VIP', 'ACTIVE'
         self.verify_table = {'http://u1.sinaimg.cn/upload/2011/07/28/5338.gif': RED_V,
-                        'http://u1.sinaimg.cn/upload/2011/07/28/5337.gif': BLUE_V,
-                        'http://u1.sinaimg.cn/upload/h5/img/hyzs/donate_btn_s.png': VIP,
-                        'http://u1.sinaimg.cn/upload/2011/08/16/5547.gif': ACTIVE}
+                             'http://u1.sinaimg.cn/upload/2011/07/28/5337.gif': BLUE_V,
+                             'http://u1.sinaimg.cn/upload/h5/img/hyzs/donate_btn_s.png': VIP,
+                             'http://u1.sinaimg.cn/upload/2011/08/16/5547.gif': ACTIVE}
         self.headers = { \
-                'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8', \
-                'Accept-Encoding':'gzip, deflate, sdch', \
-                'Accept-Language':'zh-CN,zh;q=0.8,en;q=0.6,pl;q=0.4,zh-TW;q=0.2,ru;q=0.2', \
-                'Connection':'keep-alive', \
-                'Cookie':'', \
-                'Host':'weibo.cn', \
-                'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.132 Safari/537.36' \
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8', \
+            'Accept-Encoding': 'gzip, deflate, sdch', \
+            'Accept-Language': 'zh-CN,zh;q=0.8,en;q=0.6,pl;q=0.4,zh-TW;q=0.2,ru;q=0.2', \
+            'Connection': 'keep-alive', \
+            'Cookie': '', \
+            'Host': 'weibo.cn', \
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.132 Safari/537.36' \
             }
         self.ALL, self.ORIGINAL = 'all', 'original'
         # END CONSTANT DEFINITION
@@ -72,26 +67,26 @@ class WCrawler:
         self.headers['Cookie'] = cookie
 
     def crawl(self, url='https://weibo.cn/yaochen'):
-        self.data = {'uid':'',
-                    'url': '', \
-                    'nickname': '', \
-                    'verify_type': '', \
-                    'verify_info': '', \
-                    'num_weibo': -1, \
-                    'num_fans': -1, \
-                    'num_follow': -1, \
-                    'gender': '', \
-                    'birthday': '', \
-                    'weibo': [], \
-                    'fans': [], \
-                    'follow': [], \
-                    'location': '', \
-                    'relationship_status': '', \
-                    'sexual_orientation': '', \
-                    'good_at': '', \
-                    'self-intro': '', \
-                    'tags': []
-                    }
+        self.data = {'uid': '',
+                     'url': '', \
+                     'nickname': '', \
+                     'verify_type': '', \
+                     'verify_info': '', \
+                     'num_weibo': -1, \
+                     'num_fans': -1, \
+                     'num_follow': -1, \
+                     'gender': '', \
+                     'birthday': '', \
+                     'weibo': [], \
+                     'fans': [], \
+                     'follow': [], \
+                     'location': '', \
+                     'relationship_status': '', \
+                     'sexual_orientation': '', \
+                     'good_at': '', \
+                     'self-intro': '', \
+                     'tags': []
+                     }
         self.data['url'] = self.__normalize_url(url)
 
         # step 1: crawl weibo text
@@ -190,9 +185,9 @@ class WCrawler:
         table = None
         for i in xrange(len(arr)):
             if arr[i]['class'][0] == 'tip' and arr[i].get_text() == u'基本信息':
-                assert(i + 1 < len(arr))
+                assert (i + 1 < len(arr))
                 table = arr[i + 1]
-        assert(table != None)
+        assert (table != None)
         for c in table.children:
             try:
                 if c['href'].find('keyword') > 0:
@@ -208,17 +203,27 @@ class WCrawler:
             if pos < 0 or pos + 1 == len(c):
                 continue
             key, val = c[:pos], c[pos + 1:]
-            assert(len(key) > 0 and len(val) > 0)
-            if key == u'昵称': self.data['nickname'] = val
-            elif key == u'性别': self.data['gender'] = val
-            elif key == u'地区': self.data['location'] = val
-            elif key == u'生日': self.data['birthday'] = val
-            elif key == u'简介': self.data['self-intro'] = val
-            elif key == u'性取向': self.data['sexual_orientation'] = val
-            elif key == u'认证' or key == u'认证信息': self.data['verify_info'] = val
-            elif key == u'感情状况': self.data['relationship_status'] = val
-            elif key == u'达人': self.data['good_at'] = val
-            else: stderr.write('Not include attribute: %s %s\n' % (key, val))
+            assert (len(key) > 0 and len(val) > 0)
+            if key == u'昵称':
+                self.data['nickname'] = val
+            elif key == u'性别':
+                self.data['gender'] = val
+            elif key == u'地区':
+                self.data['location'] = val
+            elif key == u'生日':
+                self.data['birthday'] = val
+            elif key == u'简介':
+                self.data['self-intro'] = val
+            elif key == u'性取向':
+                self.data['sexual_orientation'] = val
+            elif key == u'认证' or key == u'认证信息':
+                self.data['verify_info'] = val
+            elif key == u'感情状况':
+                self.data['relationship_status'] = val
+            elif key == u'达人':
+                self.data['good_at'] = val
+            else:
+                stderr.write('Not include attribute: %s %s\n' % (key, val))
 
     def __parse_fans_and_follow_url(self, soup):
         table = soup.find_all('div', attrs={'class': 'tip2'})[0]
@@ -236,14 +241,14 @@ class WCrawler:
                     fans_url = self.__remove_qmark('https://weibo.cn' + e['href'])
             except:
                 continue
-        assert(follow_url != None and fans_url != None)
+        assert (follow_url != None and fans_url != None)
         return fans_url, follow_url
 
     def __parse_info_url(self, soup):
         table = soup.find_all('table')[0]
         for e in table.find_all('a'):
             if e.get_text() == u'资料':
-                assert(e['href'][0] == '/')
+                assert (e['href'][0] == '/')
                 ret = 'https://weibo.cn' + e['href']
                 return self.__remove_qmark(ret)
         # Should not reach here in normal case
